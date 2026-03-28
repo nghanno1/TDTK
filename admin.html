@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Trang nhân viên</title>
+</head>
+<body>
+  <h1>Trang quản lý đơn hàng</h1>
+  <ul id="orders"></ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "",
+      databaseURL: ""
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const list = document.getElementById("orders");
+
+    onChildAdded(ref(db, "orders"), (data) => {
+      const order = data.val();
+
+      const li = document.createElement("li");
+      li.textContent = `${order.product} - ${order.time}`;
+      list.appendChild(li);
+
+      alert("Có đơn hàng mới!");
+    });
+  </script>
+</body>
+</html>
