@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Trang khách</title>
+</head>
+<body>
+  <h1>Shop đơn giản</h1>
+  <button onclick="buy()">Mua sản phẩm</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "",
+      databaseURL: ""
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.buy = function () {
+      push(ref(db, "orders"), {
+        product: "Áo thun",
+        time: new Date().toLocaleString()
+      });
+
+      alert("Đặt hàng thành công!");
+    };
+  </script>
+</body>
+</html>
