@@ -1,33 +1,261 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Trang khách</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRIVATE BOX</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.cart-icon {
+    cursor: pointer;
+    position: relative;
+}
+
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: red;
+    border-radius: 50%;
+    padding: 4px 7px;
+    font-size: 12px;
+}
+
+/* PRODUCTS */
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.product {
+    background: #0f3460;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    transition: 0.3s;
+    position: relative;
+}
+
+.product:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #00f2ff;
+}
+
+.product img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.price {
+    margin: 10px 0;
+    color: #00f2ff;
+}
+
+.add-btn {
+    background: #00f2ff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* POPUP */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: #16213e;
+    padding: 20px;
+    border-radius: 10px;
+    transition: 0.3s;
+    z-index: 10;
+}
+
+.popup.active {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.popup input {
+    width: 60px;
+    padding: 5px;
+    margin: 10px;
+}
+
+/* CART PAGE */
+.cart-page {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    width: 350px;
+    height: 100%;
+    background: #0f3460;
+    padding: 20px;
+    transition: 0.4s;
+}
+
+.cart-page.active {
+    right: 0;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* ANIMATION */
+.fly {
+    position: absolute;
+    width: 50px;
+    transition: 1s;
+    z-index: 999;
+}
+</style>
 </head>
+
 <body>
-  <h1>Shop đơn giản</h1>
-  <button onclick="buy()">Mua sản phẩm</button>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+<div class="header">
+    PRIVATE BOX
+    <div class="cart-icon" onclick="openCart()">
+        🛒 <span class="cart-count" id="count">0</span>
+    </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAJepauf7yjwoenS_j1a2CtmSsjagHz2kA",
-      databaseURL: "https://private-box-83109-default-rtdb.firebaseio.com"
-    };
+<div class="container" id="products"></div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+<!-- POPUP -->
+<div class="popup" id="popup">
+    <h3>Nhập số lượng</h3>
+    <input type="number" id="quantity" value="1" min="1">
+    <br><br>
+    <button onclick="addToCart()">Thêm vào giỏ hàng</button>
+</div>
 
-    window.buy = function () {
-      push(ref(db, "orders"), {
-        product: "Áo thun",
-        time: new Date().toLocaleString()
-      });
+<!-- CART -->
+<div class="cart-page" id="cartPage">
+    <h2>Giỏ hàng</h2>
+    <div id="cartItems"></div>
+    <h3 id="total"></h3>
+    <button onclick="checkout()">Thanh toán</button>
+</div>
 
-      alert("Đặt hàng thành công!");
-    };
-  </script>
+<audio id="sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+
+<script>
+const products = [
+    {name:"Bao cao su", price:20000, img:"https://i.imgur.com/1.jpg"},
+    {name:"Băng vệ sinh", price:20000, img:"https://i.imgur.com/2.jpg"},
+    {name:"Chocolate tình yêu", price:300000, img:"https://i.imgur.com/3.jpg"},
+    {name:"Thuốc tránh thai", price:30000, img:"https://i.imgur.com/4.jpg"},
+    {name:"Thuốc cảm", price:10000, img:"https://i.imgur.com/5.jpg"},
+    {name:"Kẹo ngọt", price:30000, img:"https://i.imgur.com/6.jpg"},
+    {name:"Sữa Vinamilk", price:30000, img:"https://i.imgur.com/7.jpg"},
+    {name:"Redbull", price:15000, img:"https://i.imgur.com/8.jpg"}
+];
+
+let cart = [];
+let selectedProduct = null;
+
+function renderProducts(){
+    let html="";
+    products.forEach((p,i)=>{
+        html+=`
+        <div class="product">
+            <img src="${p.img}">
+            <h4>${p.name}</h4>
+            <div class="price">${p.price}đ</div>
+            <button class="add-btn" onclick="openPopup(${i})">+</button>
+        </div>`;
+    });
+    document.getElementById("products").innerHTML=html;
+}
+renderProducts();
+
+function openPopup(index){
+    selectedProduct=index;
+    document.getElementById("popup").classList.add("active");
+}
+
+function addToCart(){
+    let qty=parseInt(document.getElementById("quantity").value);
+    let p=products[selectedProduct];
+
+    cart.push({...p, qty});
+
+    document.getElementById("popup").classList.remove("active");
+    document.getElementById("count").innerText=cart.length;
+
+    animateFly();
+}
+
+function animateFly(){
+    let img=document.createElement("img");
+    img.src=products[selectedProduct].img;
+    img.classList.add("fly");
+
+    document.body.appendChild(img);
+
+    img.style.left="50%";
+    img.style.top="50%";
+
+    setTimeout(()=>{
+        img.style.left="95%";
+        img.style.top="5%";
+        img.style.opacity="0";
+    },100);
+
+    setTimeout(()=>img.remove(),1000);
+}
+
+function openCart(){
+    document.getElementById("cartPage").classList.toggle("active");
+    renderCart();
+}
+
+function renderCart(){
+    let html="";
+    let total=0;
+
+    cart.forEach(item=>{
+        total+=item.price*item.qty;
+        html+=`<p>${item.name} x${item.qty} = ${item.price*item.qty}đ</p>`;
+    });
+
+    document.getElementById("cartItems").innerHTML=html;
+    document.getElementById("total").innerText="Tổng: "+total+"đ";
+}
+
+function checkout(){
+    alert("Thanh toán thành công!");
+    document.getElementById("sound").play();
+}
+</script>
+
 </body>
 </html>
