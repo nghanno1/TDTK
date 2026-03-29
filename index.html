@@ -14,7 +14,7 @@ body{
     background:linear-gradient(120deg,#ffd6ec,#ffe3f3,#e0f7ff);
 }
 
-/* START SCREEN */
+/* START */
 .start-screen{
     position:fixed;
     width:100%;
@@ -30,46 +30,47 @@ body{
 
 .start-btn{
     padding:15px 30px;
-    font-size:18px;
     border:none;
     border-radius:30px;
-    cursor:pointer;
     color:white;
-    transition:0.3s;
+    cursor:pointer;
+    font-size:18px;
 }
 
 .buy-now{background:linear-gradient(45deg,#ff7eb3,#ff4d88);}
 .private-mode{background:linear-gradient(45deg,#6a5acd,#00c9ff);}
 
-.start-btn:hover{
-    transform:scale(1.1);
-}
-
 /* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
+    align-items:center;
     padding:20px;
-    font-size:24px;
+    font-size:22px;
     font-weight:800;
     color:#ff4d88;
 }
 
+/* BACK HOME BUTTON */
 .back-home{
-    background:#ff4d88;
+    background:linear-gradient(45deg,#ff7eb3,#ff4d88);
     color:white;
     border:none;
-    padding:5px 10px;
-    border-radius:15px;
+    padding:8px 14px;
+    border-radius:20px;
     cursor:pointer;
+    font-size:16px;
+    transition:0.3s;
+}
+.back-home:hover{
+    transform:scale(1.1);
 }
 
-/* CART ICON */
+/* CART */
 .cart-icon{
     position:relative;
     cursor:pointer;
 }
-
 .cart-count{
     position:absolute;
     top:-8px;
@@ -89,7 +90,7 @@ body{
 }
 
 .product{
-    background:rgba(255,255,255,0.7);
+    background:white;
     border-radius:20px;
     padding:15px;
     text-align:center;
@@ -101,12 +102,15 @@ body{
     object-fit:contain;
 }
 
-.price{color:#ff4d88;margin:10px 0;}
+.price{
+    color:#ff4d88;
+    margin:10px 0;
+}
 
 .add-btn{
-    background:linear-gradient(45deg,#ff7eb3,#ff4d88);
-    border:none;
+    background:#ff4d88;
     color:white;
+    border:none;
     padding:10px;
     border-radius:50%;
     cursor:pointer;
@@ -119,13 +123,13 @@ body{
     left:50%;
     transform:translate(-50%,-50%) scale(0);
     background:white;
-    padding:25px;
-    border-radius:20px;
+    padding:20px;
+    border-radius:15px;
     transition:0.3s;
 }
 .popup.active{transform:translate(-50%,-50%) scale(1);}
 
-/* CART */
+/* CART PAGE */
 .cart-page{
     position:fixed;
     right:-100%;
@@ -140,22 +144,21 @@ body{
 }
 .cart-page.active{right:0;}
 
-.back-btn{
-    background:#ff4d88;
-    color:white;
-    border:none;
-    padding:8px 14px;
-    border-radius:20px;
-    cursor:pointer;
-}
-
 .cart-item{
     background:#fff0f6;
-    margin:10px 0;
     padding:10px;
+    margin:10px 0;
     border-radius:10px;
 }
 
+/* TOTAL FIX */
+.total-box{
+    font-weight:bold;
+    margin-top:10px;
+    color:#ff4d88;
+}
+
+/* BUTTON */
 .checkout-btn{
     margin-top:auto;
     padding:12px;
@@ -176,25 +179,28 @@ body{
 <button class="start-btn private-mode" onclick="startShop()">🔒 Mua bảo mật</button>
 </div>
 
+<!-- HEADER -->
 <div class="header">
-<button class="back-home" onclick="goHome()">🏠</button>
+<button class="back-home" onclick="goHome()">🏠 Trang đầu</button>
 PRIVATE BOX
 <div class="cart-icon" onclick="openCart()">🛒 <span id="count">0</span></div>
 </div>
 
 <div class="container" id="products"></div>
 
+<!-- POPUP -->
 <div class="popup" id="popup">
-<input type="number" id="quantity" value="1">
+<input type="number" id="quantity" value="1" min="1">
 <br><br>
 <button onclick="addToCart()">Thêm</button>
 </div>
 
+<!-- CART -->
 <div class="cart-page" id="cartPage">
-<h2>Giỏ hàng</h2>
-<button class="back-btn" onclick="closeCart()">⬅</button>
+<h2>🛍 Giỏ hàng</h2>
+<button onclick="closeCart()">⬅ Quay lại</button>
 <div id="cartItems"></div>
-<h3 id="total"></h3>
+<div class="total-box" id="total">Tổng: 0đ</div>
 <button class="checkout-btn" onclick="checkout()">Thanh toán</button>
 </div>
 
@@ -221,7 +227,6 @@ render();
 
 function goHome(){
 startScreen.style.display="flex";
-cartPage.classList.remove("active");
 }
 
 /* RENDER */
@@ -236,7 +241,7 @@ html+=`
 <button class="add-btn" onclick="openPopup(${i})">+</button>
 </div>`;
 });
-products.innerHTML=html;
+document.getElementById("products").innerHTML=html;
 }
 
 /* POPUP */
@@ -263,31 +268,32 @@ cartPage.classList.remove("active");
 
 function renderCart(){
 let html="";
-let total=0;
+let totalPrice=0;
+
 cart.forEach(item=>{
-total+=item.price*item.qty;
+totalPrice+=item.price*item.qty;
 html+=`<div class="cart-item">${item.name} x${item.qty}</div>`;
 });
-cartItems.innerHTML=html;
-totalText="Tổng: "+total.toLocaleString()+"đ";
-total.innerText=totalText;
+
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="Tổng: "+totalPrice.toLocaleString()+"đ";
 }
 
 /* CHECKOUT */
 function checkout(){
-let total=0;
-cart.forEach(item=> total+=item.price*item.qty);
+let totalPrice=0;
+cart.forEach(item=> totalPrice+=item.price*item.qty);
 
 let code=Math.floor(100000+Math.random()*900000);
 
 alert(`Thanh toán thành công 💖
 Mã đơn: ${code}
-Tổng tiền: ${total.toLocaleString()}đ`);
+Tổng tiền: ${totalPrice.toLocaleString()}đ`);
 
 cart=[];
 count.innerText=0;
 cartItems.innerHTML="";
-document.getElementById("total").innerText="";
+document.getElementById("total").innerText="Tổng: 0đ";
 cartPage.classList.remove("active");
 }
 </script>
