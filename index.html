@@ -27,17 +27,6 @@ body{
 .cart-icon{
     position:relative;
     cursor:pointer;
-    transition:0.3s;
-}
-.cart-icon.shake{
-    animation:shake 0.4s;
-}
-@keyframes shake{
-    0%{transform:translateX(0);}
-    25%{transform:translateX(-5px);}
-    50%{transform:translateX(5px);}
-    75%{transform:translateX(-5px);}
-    100%{transform:translateX(0);}
 }
 
 .cart-count{
@@ -66,6 +55,7 @@ body{
     text-align:center;
     transition:0.3s;
 }
+
 .product:hover{
     transform:translateY(-8px) scale(1.05);
 }
@@ -76,7 +66,10 @@ body{
     object-fit:contain;
 }
 
-.price{color:#ff4d88;margin:10px 0;}
+.price{
+    color:#ff4d88;
+    margin:10px 0;
+}
 
 /* BUTTON */
 .add-btn{
@@ -117,6 +110,29 @@ body{
 }
 .cart-page.active{right:0;}
 
+.cart-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+/* BACK BUTTON */
+.back-btn{
+    background:linear-gradient(45deg,#ff7eb3,#ff4d88);
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:50px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.back-btn:hover{
+    transform:translateX(-5px) scale(1.1);
+    box-shadow:0 0 10px #ff4d88;
+}
+
+/* CART ITEM */
 .cart-item{
     background:#fff0f6;
     margin:10px 0;
@@ -124,7 +140,7 @@ body{
     border-radius:10px;
 }
 
-/* BUTTON */
+/* CHECKOUT */
 .checkout-btn{
     margin-top:auto;
     padding:12px;
@@ -134,7 +150,7 @@ body{
     color:white;
 }
 
-/* FLY IMAGE */
+/* FLY */
 .fly-img{
     position:fixed;
     width:50px;
@@ -159,7 +175,7 @@ body{
 <div class="header">
 💖 PRIVATE BOX
 <div class="cart-icon" onclick="openCart()">
-🛒 <span id="count">0</span>
+🛒 <span class="cart-count" id="count">0</span>
 </div>
 </div>
 
@@ -167,17 +183,19 @@ body{
 
 <div class="popup" id="popup">
 <h3>Chọn số lượng 💕</h3>
-<input type="number" id="quantity" value="1">
+<input type="number" id="quantity" value="1" min="1">
 <br><br>
 <button onclick="addToCart()">Thêm</button>
 </div>
 
 <div class="cart-page" id="cartPage">
-<h2>Giỏ hàng</h2>
-<button onclick="closeCart()">←</button>
+<div class="cart-header">
+<h2>🛍 Giỏ hàng</h2>
+<button class="back-btn" onclick="closeCart()">⬅ Quay lại</button>
+</div>
 <div id="cartItems"></div>
-<h3 id="total"></h3>
-<button class="checkout-btn" onclick="checkout()">Thanh toán</button>
+<h3 id="total">Tổng: 0đ</h3>
+<button class="checkout-btn" onclick="checkout()">Thanh toán 💳</button>
 </div>
 
 <script>
@@ -192,7 +210,7 @@ const productList=[
 {name:"Nước tăng lực Redbull",price:15000,img:"https://cdn-icons-png.flaticon.com/512/3050/3050156.png"}
 ];
 
-let cart=JSON.parse(localStorage.getItem("cart"))||[];
+let cart=[];
 let selected=null;
 let currentButton=null;
 
@@ -204,43 +222,32 @@ html+=`
 <img src="${p.img}">
 <h4>${p.name}</h4>
 <div class="price">${p.price.toLocaleString()}đ</div>
-<button class="add-btn" onclick="openPopup(${i}, this)">+</button>
+<button class="add-btn" onclick="openPopup(${i},this)">+</button>
 </div>`;
 });
 document.getElementById("products").innerHTML=html;
-updateCount();
 }
 render();
-
-function updateCount(){
-document.getElementById("count").innerText=cart.length;
-}
 
 function openPopup(i,btn){
 selected=i;
 currentButton=btn;
-popup.classList.add("active");
+document.getElementById("popup").classList.add("active");
 }
 
 function addToCart(){
-let qty=parseInt(quantity.value);
+let qty=parseInt(document.getElementById("quantity").value);
 let p=productList[selected];
 
-let existing=cart.find(x=>x.name===p.name);
-if(existing) existing.qty+=qty;
-else cart.push({...p,qty});
+cart.push({...p,qty});
+document.getElementById("count").innerText=cart.length;
 
-localStorage.setItem("cart",JSON.stringify(cart));
-updateCount();
-
-popup.classList.remove("active");
+document.getElementById("popup").classList.remove("active");
 
 flyBezier(p.img,currentButton);
 heartEffect();
-shakeCart();
 }
 
-/* BEZIER FLY */
 function flyBezier(src,btn){
 const cartIcon=document.querySelector(".cart-icon");
 const start=btn.getBoundingClientRect();
@@ -257,7 +264,6 @@ let x1=(x0+x2)/2;
 let y1=y0-150;
 
 let t=0;
-
 function animate(){
 t+=0.05;
 let x=(1-t)*(1-t)*x0+2*(1-t)*t*x1+t*t*x2;
@@ -267,18 +273,14 @@ img.style.left=x+"px";
 img.style.top=y+"px";
 img.style.transform="scale("+(1-t)+")";
 
-if(t<1){
-requestAnimationFrame(animate);
-}else{
-img.remove();
-}
+if(t<1) requestAnimationFrame(animate);
+else img.remove();
 }
 animate();
 }
 
-/* EFFECTS */
 function heartEffect(){
-for(let i=0;i<6;i++){
+for(let i=0;i<5;i++){
 let h=document.createElement("div");
 h.innerHTML="💖";
 h.className="heart";
@@ -289,67 +291,37 @@ setTimeout(()=>h.remove(),1000);
 }
 }
 
-function shakeCart(){
-const cart=document.querySelector(".cart-icon");
-cart.classList.add("shake");
-setTimeout(()=>cart.classList.remove("shake"),400);
-}
-
-/* CART */
 function openCart(){
-cartPage.classList.add("active");
+document.getElementById("cartPage").classList.add("active");
 renderCart();
 }
+
 function closeCart(){
-cartPage.classList.remove("active");
+document.getElementById("cartPage").classList.remove("active");
 }
 
 function renderCart(){
 let html="";
 let total=0;
 
-cart.forEach((item,i)=>{
+cart.forEach(item=>{
 total+=item.price*item.qty;
-html+=`
-<div class="cart-item">
-${item.name}<br>
-<button onclick="changeQty(${i},-1)">-</button>
-${item.qty}
-<button onclick="changeQty(${i},1)">+</button>
-<button onclick="removeItem(${i})">❌</button>
-</div>`;
+html+=`<div class="cart-item">${item.name} x${item.qty}</div>`;
 });
 
-cartItems.innerHTML=html;
-total.innerText="Tổng: "+total.toLocaleString()+"đ";
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="Tổng: "+total.toLocaleString()+"đ";
 }
 
-function changeQty(i,val){
-cart[i].qty+=val;
-if(cart[i].qty<=0) cart.splice(i,1);
-localStorage.setItem("cart",JSON.stringify(cart));
-renderCart();
-updateCount();
-}
-
-function removeItem(i){
-cart.splice(i,1);
-localStorage.setItem("cart",JSON.stringify(cart));
-renderCart();
-updateCount();
-}
-
-/* CHECKOUT */
 function checkout(){
 alert("Thanh toán thành công 💖");
 
 cart=[];
-localStorage.removeItem("cart");
+document.getElementById("cartItems").innerHTML="";
+document.getElementById("total").innerText="Tổng: 0đ";
+document.getElementById("count").innerText=0;
 
-renderCart();
-updateCount();
-
-cartPage.classList.remove("active");
+document.getElementById("cartPage").classList.remove("active");
 }
 </script>
 
