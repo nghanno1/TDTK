@@ -236,7 +236,18 @@ PRIVATE BOX
 <button class="checkout-btn" onclick="checkout()">Thanh toán</button>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAJepauf7yjwoenS_j1a2CtmSsjagHz2kA",
+  databaseURL: "https://private-box-83109-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const productList=[
 {name:"Bao cao su",price:20000,img:"https://cdn-icons-png.flaticon.com/512/3209/3209265.png"},
 {name:"Băng vệ sinh",price:20000,img:"https://cdn-icons-png.flaticon.com/512/2965/2965567.png"},
@@ -280,21 +291,50 @@ document.getElementById("total").innerText="Tổng: "+totalPrice.toLocaleString(
 }
 
 function checkout(){
-let totalPrice=0;
-cart.forEach(i=>totalPrice+=i.price*i.qty);
+    // ❌ nếu giỏ hàng trống
+    if(cart.length === 0){
+        alert("Giỏ hàng trống!");
+        return;
+    }
 
-let code=Math.floor(100000+Math.random()*900000);
+    // 💰 tính tổng tiền
+    let totalPrice = cart.reduce((sum, item) => {
+        return sum + item.price * item.qty;
+    }, 0);
 
-alert(`Thanh toán thành công 💖
+    // 🔢 tạo mã đơn 6 số (không trùng gần như tuyệt đối)
+    let code = Date.now().toString().slice(-6);
+
+    // 📦 tạo object đơn hàng
+    const order = {
+        code: code,
+        items: cart,
+        total: totalPrice,
+        time: new Date().toLocaleString()
+    };
+
+    // 🚀 gửi lên Firebase
+    push(ref(db, "orders"), order);
+
+    // ✅ thông báo cho khách
+    alert(`Thanh toán thành công 💖
 Mã đơn: ${code}
 Tổng: ${totalPrice.toLocaleString()}đ`);
 
-cart=[];
-count.innerText=0;
-cartItems.innerHTML="";
-document.getElementById("total").innerText="Tổng: 0đ";
-cartPage.classList.remove("active");
+    // 🔄 reset giỏ hàng
+    cart = [];
+    count.innerText = 0;
+    cartItems.innerHTML = "";
+    document.getElementById("total").innerText = "Tổng: 0đ";
+    cartPage.classList.remove("active");
 }
+window.startShop = startShop;
+window.goHome = goHome;
+window.openPopup = openPopup;
+window.addToCart = addToCart;
+window.openCart = openCart;
+window.closeCart = closeCart;
+window.checkout = checkout;
 </script>
 
 </body>
