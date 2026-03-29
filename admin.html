@@ -20,7 +20,6 @@ body{
     padding:20px;
 }
 
-/* HEADER */
 .header{
     text-align:center;
     font-size:28px;
@@ -29,14 +28,12 @@ body{
     margin-bottom:20px;
 }
 
-/* GRID */
 .orders{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
     gap:20px;
 }
 
-/* CARD */
 .order-card{
     background:rgba(255,255,255,0.7);
     backdrop-filter:blur(15px);
@@ -44,11 +41,25 @@ body{
     padding:20px;
     box-shadow:0 10px 30px rgba(255,77,136,0.2);
     animation:fadeIn 0.5s ease;
+    position:relative;
 }
 
 @keyframes fadeIn{
     from{opacity:0; transform:translateY(20px);}
     to{opacity:1; transform:translateY(0);}
+}
+
+/* MÃ ĐƠN */
+.code{
+    position:absolute;
+    top:15px;
+    right:15px;
+    background:linear-gradient(45deg,#ff7eb3,#ff4d88);
+    color:white;
+    padding:5px 10px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:600;
 }
 
 .order-title{
@@ -82,7 +93,6 @@ body{
     opacity:0.6;
 }
 
-/* BUTTON */
 .back{
     display:block;
     margin:20px auto;
@@ -119,8 +129,16 @@ function renderOrders(){
     orders.reverse().forEach((order,index)=>{
         html += `
         <div class="order-card">
-            <div class="order-title">Khách hàng ${orders.length - index}</div>
-            <div class="time">🕒 ${order.time} - 📅 ${order.date}</div>
+
+            <div class="code">#${order.code}</div>
+
+            <div class="order-title">
+                Khách hàng ${orders.length - index}
+            </div>
+
+            <div class="time">
+                🕒 ${order.time} - 📅 ${order.date}
+            </div>
 
             ${order.items.map(i=>`
                 <div class="item">
@@ -131,6 +149,7 @@ function renderOrders(){
             <div class="total">
                 💰 Tổng: ${order.total.toLocaleString()}đ
             </div>
+
         </div>
         `;
     });
