@@ -14,6 +14,43 @@ body{
     background:linear-gradient(120deg,#ffd6ec,#ffe3f3,#e0f7ff);
 }
 
+/* START SCREEN */
+.start-screen{
+    position:fixed;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+    background:linear-gradient(135deg,#ffc0cb,#ffe3f3,#d0f0ff);
+    z-index:999;
+}
+
+.start-btn{
+    padding:15px 30px;
+    font-size:18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    color:white;
+    transition:0.3s;
+}
+
+.buy-now{
+    background:linear-gradient(45deg,#ff7eb3,#ff4d88);
+}
+
+.private-mode{
+    background:linear-gradient(45deg,#6a5acd,#00c9ff);
+}
+
+.start-btn:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 15px rgba(0,0,0,0.2);
+}
+
 /* HEADER */
 .header{
     display:flex;
@@ -49,15 +86,10 @@ body{
 
 .product{
     background:rgba(255,255,255,0.7);
-    backdrop-filter:blur(12px);
+    backdrop-filter:blur(10px);
     border-radius:20px;
     padding:15px;
     text-align:center;
-    transition:0.3s;
-}
-
-.product:hover{
-    transform:translateY(-8px) scale(1.05);
 }
 
 .product img{
@@ -66,12 +98,8 @@ body{
     object-fit:contain;
 }
 
-.price{
-    color:#ff4d88;
-    margin:10px 0;
-}
+.price{color:#ff4d88;margin:10px 0;}
 
-/* BUTTON */
 .add-btn{
     background:linear-gradient(45deg,#ff7eb3,#ff4d88);
     border:none;
@@ -110,29 +138,15 @@ body{
 }
 .cart-page.active{right:0;}
 
-.cart-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-/* BACK BUTTON */
 .back-btn{
     background:linear-gradient(45deg,#ff7eb3,#ff4d88);
     color:white;
     border:none;
     padding:8px 14px;
-    border-radius:50px;
+    border-radius:20px;
     cursor:pointer;
-    transition:0.3s;
 }
 
-.back-btn:hover{
-    transform:translateX(-5px) scale(1.1);
-    box-shadow:0 0 10px #ff4d88;
-}
-
-/* CART ITEM */
 .cart-item{
     background:#fff0f6;
     margin:10px 0;
@@ -140,7 +154,6 @@ body{
     border-radius:10px;
 }
 
-/* CHECKOUT */
 .checkout-btn{
     margin-top:auto;
     padding:12px;
@@ -149,31 +162,20 @@ body{
     border-radius:20px;
     color:white;
 }
-
-/* FLY */
-.fly-img{
-    position:fixed;
-    width:50px;
-    z-index:999;
-    pointer-events:none;
-}
-
-/* HEART */
-.heart{
-    position:absolute;
-    font-size:20px;
-    animation:float 1s ease forwards;
-}
-@keyframes float{
-    to{transform:translateY(-120px);opacity:0;}
-}
 </style>
 </head>
 
 <body>
 
+<!-- START SCREEN -->
+<div class="start-screen" id="startScreen">
+<h1>💖 PRIVATE BOX</h1>
+<button class="start-btn buy-now" onclick="startShop()">Mua ngay</button>
+<button class="start-btn private-mode" onclick="startShop()">🔒 Mua với chế độ bảo mật</button>
+</div>
+
 <div class="header">
-💖 PRIVATE BOX
+PRIVATE BOX
 <div class="cart-icon" onclick="openCart()">
 🛒 <span class="cart-count" id="count">0</span>
 </div>
@@ -182,20 +184,18 @@ body{
 <div class="container" id="products"></div>
 
 <div class="popup" id="popup">
-<h3>Chọn số lượng 💕</h3>
-<input type="number" id="quantity" value="1" min="1">
+<h3>Chọn số lượng</h3>
+<input type="number" id="quantity" value="1">
 <br><br>
 <button onclick="addToCart()">Thêm</button>
 </div>
 
 <div class="cart-page" id="cartPage">
-<div class="cart-header">
-<h2>🛍 Giỏ hàng</h2>
+<h2>Giỏ hàng</h2>
 <button class="back-btn" onclick="closeCart()">⬅ Quay lại</button>
-</div>
 <div id="cartItems"></div>
-<h3 id="total">Tổng: 0đ</h3>
-<button class="checkout-btn" onclick="checkout()">Thanh toán 💳</button>
+<h3 id="total"></h3>
+<button class="checkout-btn" onclick="checkout()">Thanh toán</button>
 </div>
 
 <script>
@@ -212,8 +212,15 @@ const productList=[
 
 let cart=[];
 let selected=null;
-let currentButton=null;
+let usedCodes=new Set();
 
+/* START */
+function startShop(){
+document.getElementById("startScreen").style.display="none";
+render();
+}
+
+/* RENDER */
 function render(){
 let html="";
 productList.forEach((p,i)=>{
@@ -222,106 +229,65 @@ html+=`
 <img src="${p.img}">
 <h4>${p.name}</h4>
 <div class="price">${p.price.toLocaleString()}đ</div>
-<button class="add-btn" onclick="openPopup(${i},this)">+</button>
+<button class="add-btn" onclick="openPopup(${i})">+</button>
 </div>`;
 });
-document.getElementById("products").innerHTML=html;
+products.innerHTML=html;
 }
-render();
 
-function openPopup(i,btn){
+/* POPUP */
+function openPopup(i){
 selected=i;
-currentButton=btn;
-document.getElementById("popup").classList.add("active");
+popup.classList.add("active");
 }
 
 function addToCart(){
-let qty=parseInt(document.getElementById("quantity").value);
-let p=productList[selected];
-
-cart.push({...p,qty});
-document.getElementById("count").innerText=cart.length;
-
-document.getElementById("popup").classList.remove("active");
-
-flyBezier(p.img,currentButton);
-heartEffect();
+let qty=parseInt(quantity.value);
+cart.push({...productList[selected],qty});
+count.innerText=cart.length;
+popup.classList.remove("active");
 }
 
-function flyBezier(src,btn){
-const cartIcon=document.querySelector(".cart-icon");
-const start=btn.getBoundingClientRect();
-const end=cartIcon.getBoundingClientRect();
-
-const img=document.createElement("img");
-img.src=src;
-img.className="fly-img";
-document.body.appendChild(img);
-
-let x0=start.left,y0=start.top;
-let x2=end.left,y2=end.top;
-let x1=(x0+x2)/2;
-let y1=y0-150;
-
-let t=0;
-function animate(){
-t+=0.05;
-let x=(1-t)*(1-t)*x0+2*(1-t)*t*x1+t*t*x2;
-let y=(1-t)*(1-t)*y0+2*(1-t)*t*y1+t*t*y2;
-
-img.style.left=x+"px";
-img.style.top=y+"px";
-img.style.transform="scale("+(1-t)+")";
-
-if(t<1) requestAnimationFrame(animate);
-else img.remove();
-}
-animate();
-}
-
-function heartEffect(){
-for(let i=0;i<5;i++){
-let h=document.createElement("div");
-h.innerHTML="💖";
-h.className="heart";
-h.style.left=Math.random()*100+"%";
-h.style.top="60%";
-document.body.appendChild(h);
-setTimeout(()=>h.remove(),1000);
-}
-}
-
+/* CART */
 function openCart(){
-document.getElementById("cartPage").classList.add("active");
+cartPage.classList.add("active");
 renderCart();
 }
-
 function closeCart(){
-document.getElementById("cartPage").classList.remove("active");
+cartPage.classList.remove("active");
 }
 
 function renderCart(){
 let html="";
 let total=0;
-
 cart.forEach(item=>{
 total+=item.price*item.qty;
 html+=`<div class="cart-item">${item.name} x${item.qty}</div>`;
 });
-
-document.getElementById("cartItems").innerHTML=html;
-document.getElementById("total").innerText="Tổng: "+total.toLocaleString()+"đ";
+cartItems.innerHTML=html;
+total.innerText="Tổng: "+total.toLocaleString()+"đ";
 }
 
+/* RANDOM CODE */
+function generateCode(){
+let code;
+do{
+code=Math.floor(100000+Math.random()*900000);
+}while(usedCodes.has(code));
+usedCodes.add(code);
+return code;
+}
+
+/* CHECKOUT */
 function checkout(){
-alert("Thanh toán thành công 💖");
+let code=generateCode();
+alert("Thanh toán thành công 💖\nMã đơn hàng: "+code);
 
 cart=[];
-document.getElementById("cartItems").innerHTML="";
-document.getElementById("total").innerText="Tổng: 0đ";
-document.getElementById("count").innerText=0;
-
-document.getElementById("cartPage").classList.remove("active");
+count.innerText=0;
+cartItems.innerHTML="";
+total.innerText="Tổng: 0đ";
+cartPage.classList.remove("active");
 }
 </script>
 
