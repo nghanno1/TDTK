@@ -1,36 +1,149 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Trang nhân viên</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đơn hàng 💖</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Montserrat',sans-serif;
+}
+
+body{
+    background:linear-gradient(120deg,#ffd6ec,#ffe3f3,#e0f7ff);
+    padding:20px;
+}
+
+/* HEADER */
+.header{
+    text-align:center;
+    font-size:28px;
+    font-weight:800;
+    color:#ff4d88;
+    margin-bottom:20px;
+}
+
+/* GRID */
+.orders{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+/* CARD */
+.order-card{
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(255,77,136,0.2);
+    animation:fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+.order-title{
+    font-weight:700;
+    color:#ff4d88;
+    margin-bottom:10px;
+}
+
+.time{
+    font-size:13px;
+    opacity:0.7;
+    margin-bottom:10px;
+}
+
+.item{
+    background:#fff0f6;
+    padding:8px;
+    border-radius:10px;
+    margin:5px 0;
+}
+
+.total{
+    margin-top:10px;
+    font-weight:700;
+    color:#ff4d88;
+}
+
+.empty{
+    text-align:center;
+    margin-top:50px;
+    opacity:0.6;
+}
+
+/* BUTTON */
+.back{
+    display:block;
+    margin:20px auto;
+    padding:10px 20px;
+    border:none;
+    border-radius:30px;
+    background:linear-gradient(45deg,#ff7eb3,#ff4d88);
+    color:white;
+    cursor:pointer;
+}
+</style>
 </head>
+
 <body>
-  <h1>Trang quản lý đơn hàng</h1>
-  <ul id="orders"></ul>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+<div class="header">📦 Lịch sử đơn hàng</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAJepauf7yjwoenS_j1a2CtmSsjagHz2kA",
-      databaseURL: "https://private-box-83109-default-rtdb.firebaseio.com"
-    };
+<div class="orders" id="orders"></div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+<button class="back" onclick="goBack()">⬅ Quay lại shop</button>
 
-    const list = document.getElementById("orders");
+<script>
+function renderOrders(){
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+    const container = document.getElementById("orders");
 
-    onChildAdded(ref(db, "orders"), (data) => {
-      const order = data.val();
+    if(orders.length === 0){
+        container.innerHTML = "<div class='empty'>Chưa có đơn hàng 💔</div>";
+        return;
+    }
 
-      const li = document.createElement("li");
-      li.textContent = `${order.product} - ${order.time}`;
-      list.appendChild(li);
+    let html = "";
 
-      alert("Có đơn hàng mới!");
+    orders.reverse().forEach((order,index)=>{
+        html += `
+        <div class="order-card">
+            <div class="order-title">Khách hàng ${orders.length - index}</div>
+            <div class="time">🕒 ${order.time} - 📅 ${order.date}</div>
+
+            ${order.items.map(i=>`
+                <div class="item">
+                    ${i.name} x${i.qty}
+                </div>
+            `).join("")}
+
+            <div class="total">
+                💰 Tổng: ${order.total.toLocaleString()}đ
+            </div>
+        </div>
+        `;
     });
-  </script>
+
+    container.innerHTML = html;
+}
+
+function goBack(){
+    window.location.href = "index.html";
+}
+
+renderOrders();
+</script>
+
 </body>
 </html>
