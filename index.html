@@ -19,14 +19,25 @@ body{
     display:flex;
     justify-content:space-between;
     padding:20px;
-    font-weight:800;
     font-size:24px;
+    font-weight:800;
     color:#ff4d88;
 }
 
 .cart-icon{
     position:relative;
     cursor:pointer;
+    transition:0.3s;
+}
+.cart-icon.shake{
+    animation:shake 0.4s;
+}
+@keyframes shake{
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-5px);}
+    50%{transform:translateX(5px);}
+    75%{transform:translateX(-5px);}
+    100%{transform:translateX(0);}
 }
 
 .cart-count{
@@ -49,13 +60,12 @@ body{
 
 .product{
     background:rgba(255,255,255,0.7);
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(12px);
     border-radius:20px;
     padding:15px;
     text-align:center;
     transition:0.3s;
 }
-
 .product:hover{
     transform:translateY(-8px) scale(1.05);
 }
@@ -90,7 +100,6 @@ body{
     text-align:center;
     transition:0.3s;
 }
-
 .popup.active{transform:translate(-50%,-50%) scale(1);}
 
 /* CART */
@@ -106,7 +115,6 @@ body{
     display:flex;
     flex-direction:column;
 }
-
 .cart-page.active{right:0;}
 
 .cart-item{
@@ -126,6 +134,14 @@ body{
     color:white;
 }
 
+/* FLY IMAGE */
+.fly-img{
+    position:fixed;
+    width:50px;
+    z-index:999;
+    pointer-events:none;
+}
+
 /* HEART */
 .heart{
     position:absolute;
@@ -133,7 +149,7 @@ body{
     animation:float 1s ease forwards;
 }
 @keyframes float{
-    to{transform:translateY(-100px);opacity:0;}
+    to{transform:translateY(-120px);opacity:0;}
 }
 </style>
 </head>
@@ -143,7 +159,7 @@ body{
 <div class="header">
 💖 PRIVATE BOX
 <div class="cart-icon" onclick="openCart()">
-🛒 <span class="cart-count" id="count">0</span>
+🛒 <span id="count">0</span>
 </div>
 </div>
 
@@ -176,8 +192,9 @@ const productList=[
 {name:"Nước tăng lực Redbull",price:15000,img:"https://cdn-icons-png.flaticon.com/512/3050/3050156.png"}
 ];
 
-let cart=[];
+let cart=JSON.parse(localStorage.getItem("cart"))||[];
 let selected=null;
+let currentButton=null;
 
 function render(){
 let html="";
@@ -187,32 +204,81 @@ html+=`
 <img src="${p.img}">
 <h4>${p.name}</h4>
 <div class="price">${p.price.toLocaleString()}đ</div>
-<button class="add-btn" onclick="openPopup(${i})">+</button>
+<button class="add-btn" onclick="openPopup(${i}, this)">+</button>
 </div>`;
 });
 document.getElementById("products").innerHTML=html;
+updateCount();
 }
 render();
 
-function openPopup(i){
+function updateCount(){
+document.getElementById("count").innerText=cart.length;
+}
+
+function openPopup(i,btn){
 selected=i;
-document.getElementById("popup").classList.add("active");
+currentButton=btn;
+popup.classList.add("active");
 }
 
 function addToCart(){
-let qty=parseInt(document.getElementById("quantity").value);
+let qty=parseInt(quantity.value);
 let p=productList[selected];
 
-cart.push({...p,qty});
-document.getElementById("count").innerText=cart.length;
+let existing=cart.find(x=>x.name===p.name);
+if(existing) existing.qty+=qty;
+else cart.push({...p,qty});
 
-document.getElementById("popup").classList.remove("active");
+localStorage.setItem("cart",JSON.stringify(cart));
+updateCount();
 
+popup.classList.remove("active");
+
+flyBezier(p.img,currentButton);
 heartEffect();
+shakeCart();
 }
 
+/* BEZIER FLY */
+function flyBezier(src,btn){
+const cartIcon=document.querySelector(".cart-icon");
+const start=btn.getBoundingClientRect();
+const end=cartIcon.getBoundingClientRect();
+
+const img=document.createElement("img");
+img.src=src;
+img.className="fly-img";
+document.body.appendChild(img);
+
+let x0=start.left,y0=start.top;
+let x2=end.left,y2=end.top;
+let x1=(x0+x2)/2;
+let y1=y0-150;
+
+let t=0;
+
+function animate(){
+t+=0.05;
+let x=(1-t)*(1-t)*x0+2*(1-t)*t*x1+t*t*x2;
+let y=(1-t)*(1-t)*y0+2*(1-t)*t*y1+t*t*y2;
+
+img.style.left=x+"px";
+img.style.top=y+"px";
+img.style.transform="scale("+(1-t)+")";
+
+if(t<1){
+requestAnimationFrame(animate);
+}else{
+img.remove();
+}
+}
+animate();
+}
+
+/* EFFECTS */
 function heartEffect(){
-for(let i=0;i<5;i++){
+for(let i=0;i<6;i++){
 let h=document.createElement("div");
 h.innerHTML="💖";
 h.className="heart";
@@ -223,13 +289,19 @@ setTimeout(()=>h.remove(),1000);
 }
 }
 
-function openCart(){
-document.getElementById("cartPage").classList.add("active");
-renderCart();
+function shakeCart(){
+const cart=document.querySelector(".cart-icon");
+cart.classList.add("shake");
+setTimeout(()=>cart.classList.remove("shake"),400);
 }
 
+/* CART */
+function openCart(){
+cartPage.classList.add("active");
+renderCart();
+}
 function closeCart(){
-document.getElementById("cartPage").classList.remove("active");
+cartPage.classList.remove("active");
 }
 
 function renderCart(){
@@ -240,16 +312,44 @@ cart.forEach((item,i)=>{
 total+=item.price*item.qty;
 html+=`
 <div class="cart-item">
-${item.name} x${item.qty}
+${item.name}<br>
+<button onclick="changeQty(${i},-1)">-</button>
+${item.qty}
+<button onclick="changeQty(${i},1)">+</button>
+<button onclick="removeItem(${i})">❌</button>
 </div>`;
 });
 
-document.getElementById("cartItems").innerHTML=html;
-document.getElementById("total").innerText="Tổng: "+total.toLocaleString()+"đ";
+cartItems.innerHTML=html;
+total.innerText="Tổng: "+total.toLocaleString()+"đ";
 }
 
+function changeQty(i,val){
+cart[i].qty+=val;
+if(cart[i].qty<=0) cart.splice(i,1);
+localStorage.setItem("cart",JSON.stringify(cart));
+renderCart();
+updateCount();
+}
+
+function removeItem(i){
+cart.splice(i,1);
+localStorage.setItem("cart",JSON.stringify(cart));
+renderCart();
+updateCount();
+}
+
+/* CHECKOUT */
 function checkout(){
 alert("Thanh toán thành công 💖");
+
+cart=[];
+localStorage.removeItem("cart");
+
+renderCart();
+updateCount();
+
+cartPage.classList.remove("active");
 }
 </script>
 
