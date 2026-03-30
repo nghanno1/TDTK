@@ -210,8 +210,8 @@ animation:pulse 2s infinite;
 
 <div class="start-screen" id="startScreen">
 <h1>💖 PRIVATE BOX</h1>
-<button class="start-btn buy-now" onclick="startShop()">Mua ngay</button>
-<button class="start-btn private-mode" onclick="startShop()">🔒 Bảo mật</button>
+  <button class="start-btn buy-now" onclick="startShop('normal')">Mua ngay</button>
+<button class="start-btn private-mode" onclick="startShop('private')">🔒 Bảo mật</button>
 </div>
 
 <div class="header">
@@ -270,8 +270,13 @@ const productList=[
 ];
 
 let cart=[],selected=null;
+let mode = "normal"; // mặc định
 
-function startShop(){startScreen.style.display="none";render();}
+function startShop(){
+mode = selectedMode; // 🔥 lưu lựa chọn
+startScreen.style.display="none";
+render();
+}
 function goHome(){startScreen.style.display="flex";}
 
 function render(){
@@ -324,7 +329,8 @@ function checkout(){
         code: code,
         items: cart,
         total: totalPrice,
-        time: new Date().toLocaleString()
+        time: new Date().toLocaleString(),
+        mode: mode
     };
 
     // 🚀 gửi lên Firebase
