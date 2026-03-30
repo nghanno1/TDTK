@@ -249,36 +249,37 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const productList=[
-{name:"Viên uống bổ sung sinh lý nam (hàu, kẽm)",price:120000,img:""},
-{name:"Nước uống tăng năng lượng (Red Bull, Sting…)",price:15000,img:""},
-{name:"Khăn giấy ướt",price:15000,img:""},
-{name:"Dung dịch vệ sinh cá nhân",price:80000,img:""},
-{name:"Bao cao su nữ (ít phổ biến)",price:50000,img:""},
-{name:"Gel massage thư giãn",price:100000,img:""},
-{name:"Nến thơm",price:70000,img:""},
-{name:"Nước hoa mini",price:120000,img:""},
-{name:"Thuốc tránh thai khẩn cấp loại phổ thông",price:25000,img:""},
-{name:"Thuốc tránh thai khẩn cấp loại tốt (Postinor)",price:60000,img:""},
-{name:"Mì gói",price:7000,img:""},
-{name:"Bánh Oreo gói nhỏ",price:26000,img:""},
-{name:"Snack Poca nhỏ",price:6000,img:""},
-{name:"Xúc xích tiệt trùng",price:10000,img:""},
-{name:"Nước suối chai 500ml",price:10000,img:""},
-{name:"Nước ngọt lon (Coca/Pepsi)",price:15000,img:""},
-{name:"Trà đóng chai C2",price:10000,img:""},
-{name:"Cà phê lon",price:20000,img:""}
+{name:"Viên uống bổ sung sinh lý nam (hàu, kẽm)",price:120000},
+{name:"Nước uống tăng năng lượng (Red Bull, Sting…)",price:15000},
+{name:"Khăn giấy ướt",price:15000},
+{name:"Dung dịch vệ sinh cá nhân",price:80000},
+{name:"Bao cao su nữ (ít phổ biến)",price:50000},
+{name:"Gel massage thư giãn",price:100000},
+{name:"Nến thơm",price:70000},
+{name:"Nước hoa mini",price:120000},
+{name:"Thuốc tránh thai khẩn cấp loại phổ thông",price:25000},
+{name:"Thuốc tránh thai khẩn cấp loại tốt (Postinor)",price:60000},
+{name:"Mì gói",price:7000},
+{name:"Bánh Oreo gói nhỏ",price:26000},
+{name:"Snack Poca nhỏ",price:6000},
+{name:"Xúc xích tiệt trùng",price:10000},
+{name:"Nước suối chai 500ml",price:10000},
+{name:"Nước ngọt lon (Coca/Pepsi)",price:15000},
+{name:"Trà đóng chai C2",price:10000},
+{name:"Cà phê lon",price:20000}
 ];
 
 let cart=[],selected=null;
-let mode = "normal"; // mặc định
+let mode = "Normal"; // mặc định
+
 function startShopNormal(){
-    mode = "normal";
+    mode = "Normal";
     startScreen.style.display="none";
     render();
 }
 
 function startShopPrivate(){
-    mode = "private";
+    mode = "Private";
     startScreen.style.display="none";
     render();
 }
@@ -291,7 +292,6 @@ function goHome(){startScreen.style.display="flex";}
 function render(){
 products.innerHTML=productList.map((p,i)=>`
 <div class="product">
-<img src="${p.img}">
 <h4>${p.name}</h4>
 <div class="price">${p.price.toLocaleString()}đ</div>
 <button class="add-btn" onclick="openPopup(${i})">+</button>
