@@ -249,10 +249,25 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const productList=[
-{name:"Bao cao su",price:20000,img:"https://cdn-icons-png.flaticon.com/512/3209/3209265.png"},
-{name:"Băng vệ sinh",price:20000,img:"https://cdn-icons-png.flaticon.com/512/2965/2965567.png"},
-{name:"Chocolate",price:300000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
-{name:"Thuốc",price:30000,img:"https://cdn-icons-png.flaticon.com/512/4320/4320371.png"}
+{name:"Viên uống bổ sung sinh lý nam (hàu, kẽm)",price:120000,img:"https://cdn-icons-png.flaticon.com/512/3209/3209265.png"},
+{name:"Nước uống tăng năng lượng (Red Bull, Sting…)",price:15000,img:"https://cdn-icons-png.flaticon.com/512/2965/2965567.png"},
+{name:"Khăn giấy ướt",price:15000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Dung dịch vệ sinh cá nhân",price:80000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Bao cao su nữ (ít phổ biến)",price:50000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Gel massage thư giãn",price:100000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Nến thơm",price:70000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Nước hoa mini",price:120000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Thuốc tránh thai khẩn cấp loại phổ thông",price:25000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Thuốc tránh thai khẩn cấp loại tốt (Postinor)",price:60000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Viên kẽm + hàu (tăng sinh lý nam)",price:120000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Mì gói",price:7000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Bánh Oreo gói nhỏ",price:26000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Snack Poca nhỏ",price:6000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Xúc xích tiệt trùng",price:10000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Nước suối chai 500ml",price:10000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Nước ngọt lon (Coca/Pepsi)",price:15000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Trà đóng chai C2",price:10000,img:"https://cdn-icons-png.flaticon.com/512/685/685352.png"},
+{name:"Cà phê lon",price:20000,img:"https://cdn-icons-png.flaticon.com/512/4320/4320371.png"}
 ];
 
 let cart=[],selected=null;
